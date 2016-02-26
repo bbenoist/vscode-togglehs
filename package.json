@@ -1,0 +1,50 @@
+{
+  "name": "togglehs",
+  "displayName": "Toggle Header/Source",
+  "description": "Quickly switch between header/source files for C and C++ files",
+  "version": "0.1.0",
+  "publisher": "bbenoist",
+  "license": "MIT",
+  "bugs": { "url": "https://github.com/bbenoist/vscode-togglehs/issues" },
+  "homepage": "https://github.com/bbenoist/vscode-togglehs/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bbenoist/vscode-togglehs.git"
+  },
+  "engines": {
+    "vscode": "^0.10.6"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:togglehs.toggleHS"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "togglehs.toggleHS",
+        "title": "Toggle Header/Source"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "togglehs.toggleHS",
+        "key": "F4"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "typescript": "^1.7.5",
+    "vscode": "^0.11.0"
+  },
+  "dependencies": {
+    "file-exists": "^1.0.0"
+  }
+}
