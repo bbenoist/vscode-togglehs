@@ -5,7 +5,9 @@
   "version": "0.1.0",
   "publisher": "bbenoist",
   "license": "MIT",
-  "bugs": { "url": "https://github.com/bbenoist/vscode-togglehs/issues" },
+  "bugs": {
+    "url": "https://github.com/bbenoist/vscode-togglehs/issues"
+  },
   "homepage": "https://github.com/bbenoist/vscode-togglehs/blob/master/README.md",
   "repository": {
     "type": "git",
@@ -46,5 +48,6 @@
   },
   "dependencies": {
     "file-exists": "^1.0.0",
+    "slash": "^1.0.0"
   }
 }

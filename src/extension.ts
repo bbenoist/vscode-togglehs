@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 var fileExists = require('file-exists');
+var slash = require('slash');
 
 const headerExts = [ '.h', '.hpp', '.hh', '.hxx' ];
 const sourceExts = [ '.c', '.cpp', '.cc', '.cxx', '.m', '.mm' ];
@@ -13,37 +14,89 @@ function allExts(exts:string[]) {
 
 // Test whether a given file has an extension included in the given array.
 function testExtension(fileName:string, exts:string[]) {
-  var found = allExts(exts).find((ext) => { return ext === path.extname(fileName); });
+  var found = allExts(exts).find((ext) => {
+    return ext === path.extname(fileName);
+  });
   return undefined != found;
 }
 
-// Finds a file matching an extension included in the given array.
-function findFile(baseName:string, exts:string[]) {
-  return allExts(exts).map((ext) => { return baseName + ext; })
-    .find((fileName) => { return fileExists(fileName); });
+// Removes extension from file name.
+function removeExtension(fileName:string) {
+  return fileName.substr(0, fileName.lastIndexOf('.'));
 }
 
-// Try to toggle current vscode file from a given set of extensions to another.
-function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
-  return new Promise<boolean>((accept, reject) => {
-    if (file.scheme !== 'file') {
-      reject('Unsupported file scheme.');
-    }
-    var fileStr = file.fsPath;
-    if (!testExtension(fileStr, from)) {
-      accept(false);
-    }
-    var baseName = fileStr.substr(0, fileStr.lastIndexOf('.'));
-    var found = findFile(baseName, to);
-    if (found) {
-      vscode.workspace.openTextDocument(found).then(
-        (doc) => {
-          vscode.window.showTextDocument(doc).then(() => { accept(true); }, reject);
-        }, reject
-      );
-    } else {
-      reject('Cannot find corresponding file.');
-    }
+// Returns true if given file is an header, false otherwise.
+function isHeader(fileName:string) {
+  return testExtension(fileName, headerExts);
+}
+
+// Returns true if given file is source, false otherwise.
+function isSource(fileName:string) {
+  return testExtension(fileName, sourceExts);
+}
+
+// Returns true if file is local, false otherwise.
+function isLocalFile(uri:vscode.Uri) {
+  return uri.scheme === 'file';
+}
+
+// Try to get local file value.
+function getLocalFile(uri:vscode.Uri) {
+  if (isLocalFile(uri)) {
+    return uri.fsPath;
+  }
+  throw "Unsupported file scheme.";
+}
+
+// Return extensions which are the opposite of a given file name.
+function getOppositeExts(fileName:string) {
+  if (isHeader(fileName)) { return sourceExts; }
+  if (isSource(fileName)) { return headerExts; }
+  return undefined;
+}
+
+// Returns the location of a given file name relative to the workspace root
+// directory.
+function workspaceRelative(fileName:string) {
+  return path.relative(vscode.workspace.rootPath, fileName);
+}
+
+// Finds a file matching an extension included in the given array.
+function findFile(pattern:string, exts:string[]) {
+  return new Promise<string>((accept, reject) => {
+    vscode.workspace.findFiles(pattern, '').then((uris) => {
+      var found = uris.find((uri) => {
+        return testExtension(uri.fsPath, exts) && fileExists(uri.fsPath);
+      });
+      if (found == undefined) {
+        reject("Cannot find corresponding file.");
+      }
+      accept(found.fsPath);
+    }, reject);
+  });
+}
+
+// Opens the given file in vscode workspace.
+function openFile(fileName:string) {
+  return new Promise((accept, reject) => {
+    vscode.workspace.openTextDocument(fileName).then(
+      (doc) => {
+        vscode.window.showTextDocument(doc).then(() => { accept(true); }, reject);
+      }, reject
+    );
+  });
+}
+
+// Tries to toggle current file between source and header.
+function toggleHS() {
+  return new Promise((accept, reject) => {
+    var fileName = getLocalFile(vscode.window.activeTextEditor.document.uri);
+    var exts = getOppositeExts(fileName);
+    var glob = slash(removeExtension(workspaceRelative(fileName))) + '.*';
+    findFile(slash(glob), exts).then(openFile, () => {
+      findFile(path.posix.join('**', path.posix.basename(glob)), exts)
+        .then(openFile, reject);
+    });
   });
 }
 
@@ -51,22 +104,10 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
 // Unfortunately, we cannot (yet) make the toggle command only displaying when a file with a matching extension is opened.
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerTextEditorCommand('togglehs.toggleHS', (textEditor, edit) => {
-    var currentFile = vscode.window.activeTextEditor.document.uri;
-    tryToggle(currentFile, headerExts, sourceExts).then((ok) => {
-      if (!ok) {
-        tryToggle(currentFile, sourceExts, headerExts).then((ok) => {
-          if (!ok) {
-            vscode.window.showErrorMessage('Cannot find corresponding file.');
-          }
-        }).catch((reason) => {
-          vscode.window.showErrorMessage(reason);
-        });
-      }
-    }).catch((reason) => {
+    toggleHS().catch((reason) => {
       vscode.window.showErrorMessage(reason);
     });
   });
-
   context.subscriptions.push(disposable);
 }
 
