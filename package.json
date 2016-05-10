@@ -41,10 +41,10 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
-    "typescript": "^1.7.5",
-    "vscode": "^0.11.0"
+    "typescript": "^1.8.10",
+    "vscode": "^0.11.12"
   },
   "dependencies": {
-    "file-exists": "^1.0.0"
+    "file-exists": "^1.0.0",
   }
 }
