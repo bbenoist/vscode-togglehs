@@ -23,6 +23,8 @@ function findFile(baseName:string, exts:string[]) {
     .find((fileName) => { return fileExists(fileName); });
 }
 
+// No apparent way to get column for a visible editor.
+// https://github.com/Microsoft/vscode/issues/6330
 function getTextEditorViewColumn(textEditor:any) : number {
   return textEditor._viewColumn;
 }
