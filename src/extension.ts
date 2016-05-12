@@ -23,6 +23,10 @@ function findFile(baseName:string, exts:string[]) {
     .find((fileName) => { return fileExists(fileName); });
 }
 
+function getTextEditorViewColumn(textEditor:any) : number {
+  return textEditor._viewColumn;
+}
+
 // Try to toggle current vscode file from a given set of extensions to another.
 function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
   return new Promise<boolean>((accept, reject) => {
@@ -38,7 +42,8 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
     if (found) {
       vscode.workspace.openTextDocument(found).then(
         (doc) => {
-          vscode.window.showTextDocument(doc).then(() => { accept(true); }, reject);
+          var column = getTextEditorViewColumn(vscode.window.activeTextEditor);
+          vscode.window.showTextDocument(doc, column).then(() => { accept(true); }, reject);
         }, reject
       );
     } else {
