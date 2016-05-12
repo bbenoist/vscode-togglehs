@@ -2,7 +2,7 @@
   "name": "togglehs",
   "displayName": "Toggle Header/Source",
   "description": "Quickly switch between header/source files for C and C++ files",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "bbenoist",
   "license": "MIT",
   "bugs": { "url": "https://github.com/bbenoist/vscode-togglehs/issues" },
