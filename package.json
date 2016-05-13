@@ -12,7 +12,7 @@
     "url": "https://github.com/bbenoist/vscode-togglehs.git"
   },
   "engines": {
-    "vscode": "^0.10.6"
+    "vscode": "^1.0.0"
   },
   "categories": [
     "Other"
