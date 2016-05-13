@@ -23,12 +23,6 @@ function findFile(baseName:string, exts:string[]) {
     .find((fileName) => { return fileExists(fileName); });
 }
 
-// No apparent way to get column for a visible editor.
-// https://github.com/Microsoft/vscode/issues/6330
-function getTextEditorViewColumn(textEditor:any) : number {
-  return textEditor._viewColumn;
-}
-
 // Try to toggle current vscode file from a given set of extensions to another.
 function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
   return new Promise<boolean>((accept, reject) => {
@@ -44,7 +38,7 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
     if (found) {
       vscode.workspace.openTextDocument(found).then(
         (doc) => {
-          var column = getTextEditorViewColumn(vscode.window.activeTextEditor);
+          var column = vscode.window.activeTextEditor.viewColumn;
           vscode.window.showTextDocument(doc, column).then(() => { accept(true); }, reject);
         }, reject
       );
