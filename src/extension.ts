@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 var fileExists = require('file-exists');
 
 const headerExts = [ '.h', '.hpp', '.hh', '.hxx' ];
@@ -34,6 +35,7 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
       accept(false);
     }
     var baseName = fileStr.substr(0, fileStr.lastIndexOf('.'));
+    const fileName = baseName + to[0];
     var found = findFile(baseName, to);
     if (found) {
       vscode.workspace.openTextDocument(found).then(
@@ -43,7 +45,13 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
         }, reject
       );
     } else {
-      reject('Cannot find corresponding file.');
+      try {
+        fs.writeFile(fileName, '', () => {
+          tryToggle(file, from, to);
+        });
+      } catch (e) {
+        reject('Cannot find corresponding file.');      
+      }
     }
   });
 }
