@@ -4,7 +4,7 @@ import * as path from 'path';
 var fileExists = require('file-exists');
 
 const headerExts = [ '.h', '.hpp', '.hh', '.hxx' ];
-const sourceExts = [ '.c', '.cpp', '.cc', '.cxx', '.m', '.mm' ];
+const sourceExts = [ '.c', '.cpp', '.cc', '.cxx', '.m', '.mm', '.cu' ];
 
 // Generates appropriate variants for the predefined extensions arrays.
 function allExts(exts:string[]) {
