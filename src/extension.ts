@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 var fileExists = require('file-exists');
 
-const headerExts = [ '.h', '.hpp', '.hh', '.hxx' ];
+const headerExts = [ '.h', '.hpp', '.hh', '.hxx', '_p.h' ];
 const sourceExts = [ '.c', '.cpp', '.cc', '.cxx', '.m', '.mm' ];
 
 // Generates appropriate variants for the predefined extensions arrays.
@@ -35,6 +35,13 @@ function tryToggle(file:vscode.Uri, from:string[], to:string[]) {
     }
     var baseName = fileStr.substr(0, fileStr.lastIndexOf('.'));
     var found = findFile(baseName, to);
+
+    if (!found && fileStr.endsWith('_p.h')) {
+      // Allow private headers (ending in _p.h) to toggle to .cpp too)
+      baseName = fileStr.substr(0, fileStr.lastIndexOf('_'));
+      found = findFile(baseName, to);
+    }
+
     if (found) {
       vscode.workspace.openTextDocument(found).then(
         (doc) => {
